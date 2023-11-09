@@ -1,5 +1,5 @@
 local Responses = require("modules.http_responses")
-local Contents = require("config.content-type")
+local Contents = require("core.content-type")
 local Validator = {}
 
 

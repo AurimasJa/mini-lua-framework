@@ -72,7 +72,6 @@ function router.match(url, method, urlParams, uhttpd, body)
     -- print("------------------------")
     -- print(controller_name, function_name)
     -- if not controller or not function_name then
-    --     -- Handle invalid handler
     --     Responses.send_internal_server_error(uhttpd)
     --     return
     -- end
@@ -80,7 +79,7 @@ function router.match(url, method, urlParams, uhttpd, body)
     local controller = require("controllers.main_controller")
     -- function_name = function_name or "index"
 
-    -- -- Call the controller function
     controller[route.handler_method](url, params, body)
 end
+
 return router

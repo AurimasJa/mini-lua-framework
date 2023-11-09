@@ -6,7 +6,6 @@ function Helper.read_request_body(headers)
 
     local requestBody = ""
     if contentLength > 0 then
-        -- Read the request body using io library
         local input = io.input():read(contentLength)
         if input then
             requestBody = input

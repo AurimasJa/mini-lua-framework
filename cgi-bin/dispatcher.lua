@@ -36,19 +36,6 @@ function handle_route(env)
         Router.match(parsedUrl, Parser.parse_request_method(env), urlParams, uhttpd, body)
     end
 
-
-    -- local parsedUrl = Parser.parse_url_route(env)
-    -- local request_method = Parser.parse_request_method(env)
-
-    -- if parsedUrl:match("^route/") then
-
-    --     local Router = require("modules.router")
-    --     local send = send_response
-    --     Router.env = env
-    --     Router.handle_request(env, send)
-    -- else
-    --     uhttpd.send("invalid link")
-    -- end
 end
 
 -- Main body required by uhhtpd-lua plugin
@@ -57,63 +44,6 @@ function handle_request(env)
     uhttpd.send("Status: 200\r\n")
     uhttpd.send("Content-Type: application/json\r\n\r\n")
     handle_route(env)
-
-    -- handle_route(env)
-    -- for k, v in pairs(env) do
-    --     if type(v) == "table" then
-    --         for key, value in pairs(v) do
-    --             uhttpd.send(key .. "  ->  " .. value .. "\n")
-    --         end
-    --     else
-    --         uhttpd.send(k .. "  ->  " .. v .. "   \n")
-    --     end
-    -- end
 end
 
 return Dispatcher
-
--- uhttpd.send("   ||| {METHOD} ---->  " .. request_method .. "\r\n")
--- uhttpd.send("   ||| {ROUTE} ---->  " .. parsedUrl .. "\r\n\r\n")
-
--- for k, v in pairs(env) do
---     if type(v) == "table" then
---         for key, value in pairs(v) do
---             uhttpd.send(key .. "  ->  " .. value .. "\n")
---         end
---     else
---         uhttpd.send(k .. "  ->  " .. v .. "   \n")
---     end
--- end
-
--- Router.send = send_response
--- Router.env = env
--- Router.handle_request(env)
-
-
--- local route = env.REQUEST_URI  -- Extract the route from the request URI
--- print(route)
--- if Router.route(route) then
---     local url = "localhost"
---     local headers = { ["Content-Type"] = "application/json", ["Date"] = "2023-11-07" }
---     local parsedData = Parser.parseEnvironmentVariables(url, headers)
---     print("Parsed Data:", parsedData)
---     -- print(#parsedData)
---     -- for key, value in pairs(parsedData) do
---     --     print(key .. "   ----->    " .. value)
---     --     break
---     -- end
---     local contentType = "application/json"
---     if ContentType.supportedTypes(contentType) then
---         print("Content type supported:", contentType)
---     end
-
---     local statusCode = 200
---     HTTPCodes.setCode(statusCode)
-
---     local validationHeaders = { ["Content-Type"] = "application/json", ["Date"] = "2023-11-07" }
---     local isValid, message = Validator.validateRequest(validationHeaders, "Some data")
---     print("Validation:", isValid, message)
--- else
---     -- Handle case when the route doesn't exist
---     send_response("Route not found")
--- end

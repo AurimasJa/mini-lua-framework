@@ -1,4 +1,3 @@
--- controller.lua
 
 local controller = {
     index = function(req, params, data)
