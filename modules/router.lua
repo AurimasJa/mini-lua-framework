@@ -1,4 +1,3 @@
--- router.lua
 local Parser = require("middleware.parser")
 local Responses = require("modules.http_responses")
 local router = {}
@@ -45,14 +44,7 @@ function router.delete(url, handler)
 end
 
 function router.match(url, method, urlParams, uhttpd, body)
-    -- local url = urlas
-    -- local method = "GET"
     local params = urlParams
-    -- local data = "asdsad"
-    print(url .. " <-----------")
-    print(method .. " <-----------")
-    print(params .. " <-----------")
-    print(body .. " <-----------")
     if method == "GET" then
         router.get(url)
     elseif method == "POST" then
@@ -91,5 +83,4 @@ function router.match(url, method, urlParams, uhttpd, body)
     -- -- Call the controller function
     controller[route.handler_method](url, params, body)
 end
-
 return router
