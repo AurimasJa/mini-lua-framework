@@ -4,7 +4,7 @@ local Parser = require("middleware.parser")
 local Validator = require("middleware.validator")
 local Request = require("modules.request")
 local Helper = require("helpers.read_request_body")
-local routes = require("routes")
+local Routes = require("routes")
 
 local function send_response(response)
     uhttpd.send("Status: 200\r\n")
@@ -15,8 +15,8 @@ end
 local Dispatcher = {}
 
 function handle_route(env)
+    local method = Parser.parse_request_method(env)
     local parsedUrl = Parser.parse_url_route(env)
-    print(parsedUrl)
     local urlParams, headers = Parser.parseRequest(env)
     local content_type = Validator.validate_content_type(uhttpd, headers)
     if content_type ~= false then
@@ -33,9 +33,29 @@ function handle_route(env)
         if req:get_payload() ~= nil then
             print(req:get_payload())
         end
-        Router.match(parsedUrl, Parser.parse_request_method(env), urlParams, uhttpd, body)
-    end
+        print("------------------------------------")
+        print(Routes.route(parsedUrl, method, uhttpd, req))
+        print("------------------------------------")
+        print(Routes.route("/resource/post", "POST", uhttpd, req))
+        print("------------------------------------")
+        print(Routes.route("/resource/put", "PUT", uhttpd, req))
+        print("------------------------------------")
+        print(Routes.route("/resource/patch", "PATCH", uhttpd, req))
+        print("------------------------------------")
+        print(Routes.route("/resource/delete", "DELETE", uhttpd, req))
+        print("------------------------------------")
+        print(Routes.route("/resource/test", "GET", uhttpd, req))
+        print("------------------------------------")
+        print(Routes.route("/resource/te", "GET", uhttpd, req))
+        print("------------------------------------")
+        print(Routes.route("/resource/testas", "GET", uhttpd, req))
+        print("------------------------------------")
+        print(Routes.route("/resource/anon", "GET", uhttpd, req))
+        print("------------------------------------")
+        print(Routes.route("/resource/testukas", "GET", uhttpd, req))
+        print("------------------------------------")
 
+    end
 end
 
 -- Main body required by uhhtpd-lua plugin

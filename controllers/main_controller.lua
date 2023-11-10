@@ -1,24 +1,24 @@
+local MainController = {}
 
-local controller = {
-    index = function(req, params, data)
-        print("ind")
-        print(req, params, data)
-    end,
 
-    create = function(req, params, data)
-        print("cre")
-        print(req, params, data)
-    end,
+function MainController.index(body)
+    return "Index, main controller"
+end
 
-    update = function(req, params, data)
-        print("upd")
-        print(req, params, data)
-    end,
+function MainController.create(body)
+    return "Create, main controller"
+end
 
-    destroy = function(req, params, data)
-        print("del")
-        print(req, params, data)
-    end
-}
+function MainController.update(body)
+    return "Put/patch, main controller"
+end
 
-return controller
+function MainController.destroy(body)
+    return "Destroy, main controller"
+end
+
+function MainController.default(body)
+    return "default, main controller"
+end
+
+return MainController

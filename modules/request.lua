@@ -26,11 +26,11 @@ function Request:get_query()
     return self.query
 end
 
-function Request:get_headers(query)
+function Request:get_headers()
     return self.headers
 end
 
-function Request:get_payload(query)
+function Request:get_payload()
     return self.payload
 end
 return Request

@@ -1,85 +1,73 @@
-local Parser = require("middleware.parser")
 local Responses = require("modules.http_responses")
-local router = {}
+local Router = {}
 local routes = {}
+local contr = require("controllers.main_controller")
 
-function router.get(url, handler)
+function Router.add_route(url, handler, method)
     routes[url] = {
-        method = "GET",
-        handler = handler or "main_controller",
-        handler_method = "index"
-    };
+        method = method,
+        handler = handler
+    }
 end
 
-function router.post(url, handler)
-    routes[url] = {
-        method = "POST",
-        handler = handler or "main_controller",
-        handler_method = "create"
-    };
+function Router.get(url, handler)
+    Router.add_route(url, handler, "GET")
 end
 
-function router.put(url, handler)
-    routes[url] = {
-        method = "PUT",
-        handler = handler or "main_controller",
-        handler_method = "update"
-    };
+function Router.post(url, handler)
+    Router.add_route(url, handler, "POST")
 end
 
-function router.patch(url, handler)
-    routes[url] = {
-        method = "PATCH",
-        handler = handler or "main_controller",
-        handler_method = "update"
-    };
+function Router.put(url, handler)
+    Router.add_route(url, handler, "PUT")
 end
 
-function router.delete(url, handler)
-    routes[url] = {
-        method = "DELETE",
-        handler = handler or "main_controller",
-        handler_method = "destroy"
-    };
+function Router.patch(url, handler)
+    Router.add_route(url, handler, "PATCH")
 end
 
-function router.match(url, method, urlParams, uhttpd, body)
-    local params = urlParams
-    if method == "GET" then
-        router.get(url)
-    elseif method == "POST" then
-        router.post(url)
-    elseif method == "PUT" then
-        router.put(url)
-    elseif method == "DELETE" then
-        router.delete(url)
-    end
+function Router.delete(url, handler)
+    Router.add_route(url, handler, "DELETE")
+end
 
+function Router.default(params)
+    return contr.default("test")
+end
+
+function Router.route(url, method, uhttpd, req)
     local route = routes[url]
-    print(route.handler)
+
     if not route then
-        Responses.send_not_found(uhttpd)
-        return
+        return Router.default(url)
+    end
+    local handler = route.handler
+
+    if route.method ~= method or not handler then
+        return Responses.send_method_not_allowed(uhttpd) -- check response
     end
 
-    print(method, route.method)
-    if method ~= route.method then
-        Responses.send_method_not_allowed(uhttpd)
-        return
+    if type(handler) == "function" then
+        return handler(req)
     end
 
-    -- local controller_name, function_name = string.gmatch(route.handler,"([^.]+)%.([^.]+)")--(%a+).(%a+)
-    -- print("------------------------")
-    -- print(controller_name, function_name)
-    -- if not controller or not function_name then
-    --     Responses.send_internal_server_error(uhttpd)
-    --     return
-    -- end
+    local controller_name, function_name = string.match(handler, "([^.]+)%.?([^.]*)")
+    if not function_name or function_name == "" then
+        function_name = "default"
+    end
+    if not controller_name then
+        return Responses.send_internal_server_error(uhttpd) -- check response
+    end
 
-    local controller = require("controllers.main_controller")
-    -- function_name = function_name or "index"
+    local success, controller = pcall(require, "controllers." .. controller_name)
+    if not success then
+        return Responses.send_internal_server_error(uhttpd) -- check response
+    end
 
-    controller[route.handler_method](url, params, body)
+    if not controller or not controller[function_name] or type(controller[function_name]) ~= "function" then
+        return Responses.send_internal_server_error(uhttpd) -- check response
+    end
+
+    return controller[function_name](req)
 end
 
-return router
+return Router
