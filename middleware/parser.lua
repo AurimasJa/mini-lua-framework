@@ -66,8 +66,10 @@ function Parser.parse_url_route(env)
     if string.find(route, "/$") then
         route = route:sub(1, -2)
     end
-    return string.match(route, "/api(.+)") --/api/(.+)
+    return string.match(route, "/api(/[^?]+)")
 end
+
+-- function Parser.is_parameter_must_be
 
 function Parser.parse_url_parameters(url)
     local params = {}
@@ -90,7 +92,7 @@ function Parser.parse_url_parameters(url)
     return params
 end
 
-function Parser.parse_body(content_type, body, urlParams, parsedUrl, headers)
+function Parser.parse_body(content_type, body, urlParams, headers)
     local data = {}
     local data_error
     local req = Request:create()
@@ -109,7 +111,7 @@ function Parser.parse_body(content_type, body, urlParams, parsedUrl, headers)
     end
     if not data.error then
         req:set_headers(headers)
-        req:set_query(parsedUrl)
+        req:set_query(urlParams)
         req:set_payload(data)
         return req
     end

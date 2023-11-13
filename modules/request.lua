@@ -24,11 +24,11 @@ function Request:set_payload(payload)
 end
 
 function Request:get_query()
-    local response = {
-        url = self.query
-    }
-    local json_response = cjson.encode(response)
-    return json_response
+    -- local response = {
+    --     url = self.query
+    -- }
+    -- local json_response = cjson.encode(response)
+    return self.query
 end
 
 function Request:get_query_value(key)

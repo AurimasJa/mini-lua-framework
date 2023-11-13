@@ -34,9 +34,9 @@ function Responses.send_forbidden(uhttpd)
     os.exit()
 end
 
-function Responses.send_not_found(uhttpd)
+function Responses.send_not_found(uhttpd, message)
     local response = {
-        response = "Not Found"
+        response = message
     }
     local json_response = cjson.encode(response)
     uhttpd.send("Status: 404 Not Found\r\n")

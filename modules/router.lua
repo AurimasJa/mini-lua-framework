@@ -36,12 +36,26 @@ function Router.default(params)
 end
 
 function Router.route(url, urlParams, method, uhttpd, req)
+    uhttpd.send("Status: 200\r\n")
+    uhttpd.send("Content-Type: application/json\r\n\r\n") -- HARDCODED ATM !
     local parsed_url = Parser.parse_url_parameters(urlParams)
-
+    print(url)
     local route = routes[url]
 
     if not route then
-        return Responses.send_not_found(uhttpd) -- check response
+        local foundPattern
+        for pattern, handler in pairs(routes) do
+            print(url:match(pattern))
+            local matchedParams = { url:match(pattern) }
+            if #matchedParams > 0 and handler.method == method then
+                if not foundPattern or #matchedParams > #foundPattern then
+                    foundPattern = matchedParams
+                end
+            end
+        end
+
+        print(foundPattern)
+        -- return Responses.send_not_found(uhttpd, "Route is not implemented") -- check response
     end
     local handler = route.handler
 
@@ -64,11 +78,11 @@ function Router.route(url, urlParams, method, uhttpd, req)
 
     local success, controller = pcall(require, "controllers." .. controller_name)
     if not success then
-        return Responses.send_not_found(uhttpd) -- check response
+        return Responses.send_not_found(uhttpd, "Controller does not exist!") -- check response
     end
 
     if not controller or not controller[function_name] or type(controller[function_name]) ~= "function" then
-        return Responses.send_not_found(uhttpd) -- check response
+        return Responses.send_not_found(uhttpd, "Controller method does not exist!") -- check response
     end
 
     return controller[function_name](req)

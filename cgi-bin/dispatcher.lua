@@ -20,14 +20,15 @@ function handle_route(env)
     local parsedUrl = Parser.parse_url_route(env)
     local urlParams, headers = Parser.parseRequest(env)
     local content_type = Validator.validate_content_type(uhttpd, headers)
+    uhttpd.send("Status: 200\r\n")
+    uhttpd.send("Content-Type: application/json\r\n\r\n") -- HARDCODED ATM ! 
     if content_type ~= false then
         local body = Helper.read_request_body(headers)
         local req = Request:create()
-        req = Parser.parse_body(content_type, body, urlParams, parsedUrl, headers)
+        req = Parser.parse_body(content_type, body, urlParams, headers)
         local route = Routes.route(parsedUrl, urlParams, method, uhttpd, req)
 
-        uhttpd.send("Status: 200\r\n")
-        uhttpd.send("Content-Type: application/json\r\n\r\n")
+
         if route ~= nil then
             print(route)
         end
