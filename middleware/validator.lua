@@ -1,5 +1,5 @@
 local Responses = require("modules.http_responses")
-local Contents = require("core.content-type")
+local Available_Contents = require("core.content-type")
 local Validator = {}
 
 
@@ -10,21 +10,21 @@ function Validator.validate_content_type(uhttpd, headers)
         return false
     end
 
-    local contentType = headers.CONTENT_TYPE
+    local content_type = headers.CONTENT_TYPE
 
-    local isValidContentType = false
-    if type(Contents[contentType]) == "boolean" then
-        isValidContentType = Contents[contentType]
-    elseif type(Contents["multipart/form-data"]) == "function" then
-        isValidContentType = Contents["multipart/form-data"](contentType)
+    local is_valid = false
+    for _, allowed_type in ipairs(Available_Contents) do
+        if string.match(content_type, allowed_type) then
+            is_valid = true
+            break
+        end
     end
 
-    if not isValidContentType then
+    if not is_valid then
         Responses.send_unsupported_media_type(uhttpd)
-        return false
     end
 
-    return contentType
+    return content_type
 end
 
 

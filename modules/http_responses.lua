@@ -1,38 +1,84 @@
+local cjson = require("cjson")
 local Responses = {}
 
 function Responses.send_bad_request(uhttpd)
-    uhttpd.send("Status: 400\r\n")
-    uhttpd.send("Bad request\r\n\r\n")
+    local response = {
+        response = "Bad request"
+    }
+    local json_response = cjson.encode(response)
+    uhttpd.send("Status: 400 Bad request\r\n")
+    uhttpd.send("Content-Type: application/json\r\n\r\n")
+    uhttpd.send(json_response)
+    os.exit()
 end
 
 function Responses.send_unauthorized(uhttpd)
-    uhttpd.send("Status: 401\r\n")
-    uhttpd.send("Unauthorized\r\n\r\n")
+    local response = {
+        response = "Unauthorized"
+    }
+    local json_response = cjson.encode(response)
+    uhttpd.send("Status: 401 Unauthorized\r\n")
+    uhttpd.send("Content-Type: application/json\r\n\r\n")
+    uhttpd.send(json_response)
+    os.exit()
 end
 
 function Responses.send_forbidden(uhttpd)
-    uhttpd.send("Status: 403\r\n")
-    uhttpd.send("Forbidden\r\n\r\n")
+    local response = {
+        response = "Forbidden"
+    }
+    local json_response = cjson.encode(response)
+    uhttpd.send("Status: 403 Forbidden\r\n")
+    uhttpd.send("Content-Type: application/json\r\n\r\n")
+    uhttpd.send(json_response)
+    os.exit()
 end
 
 function Responses.send_not_found(uhttpd)
-    uhttpd.send("Status: 404\r\n")
-    uhttpd.send("Not Found\r\n\r\n")
+    local response = {
+        response = "Not Found"
+    }
+    local json_response = cjson.encode(response)
+    uhttpd.send("Status: 404 Not Found\r\n")
+    uhttpd.send("Content-Type: application/json\r\n\r\n")
+    uhttpd.send(json_response)
+    os.exit()
 end
 
 function Responses.send_method_not_allowed(uhttpd)
-    uhttpd.send("Status: 405\r\n")
-    uhttpd.send("Method not allowed\r\n\r\n")
+    local response = {
+        response = "Method not allowed"
+    }
+
+    local json_response = cjson.encode(response)
+
+    uhttpd.send("Status: 405 Method not allowed\r\n")
+    uhttpd.send("Content-Type: application/json\r\n\r\n")
+    uhttpd.send(json_response)
+    os.exit()
 end
 
+
 function Responses.send_unsupported_media_type(uhttpd)
-    uhttpd.send("Status: 415\r\n")
-    uhttpd.send("Provided content is not supported\r\n\r\n")
+    local response = {
+        response = "Unsupported Media Type"
+    }
+    local json_response = cjson.encode(response)
+    uhttpd.send("Status: 415 Unsupported Media Type\r\n")
+    uhttpd.send("Content-Type: application/json\r\n\r\n")
+    uhttpd.send(json_response)
+    os.exit()
 end
 
 function Responses.send_internal_server_error(uhttpd)
-    uhttpd.send("Status: 500\r\n")
-    uhttpd.send("Internal server error\r\n\r\n")
+    local response = {
+        response = "Internal server error"
+    }
+    local json_response = cjson.encode(response)
+    uhttpd.send("Status: 500 Internal server error\r\n")
+    uhttpd.send("Content-Type: application/json\r\n\r\n")
+    uhttpd.send(json_response)
+    os.exit()
 end
 
 return Responses

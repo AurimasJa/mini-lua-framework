@@ -1,24 +1,45 @@
+local cjson = require("cjson")
 local MainController = {}
 
 
 function MainController.index(body)
-    return "Index, main controller"
+    local response = {
+        message = "Index, main controller"
+    }
+    local json_response = cjson.encode(response)
+    return json_response
 end
 
 function MainController.create(body)
-    return "Create, main controller"
+    local response = {
+        message = "Create, main controller"
+    }
+    local json_response = cjson.encode(response)
+    return json_response
 end
 
 function MainController.update(body)
-    return "Put/patch, main controller"
+    local response = {
+        message = "Put/patch, main controller"
+    }
+    local json_response = cjson.encode(response)
+    return json_response
 end
 
 function MainController.destroy(body)
-    return "Destroy, main controller"
+    local response = {
+        message = "Destroy, main controller"
+    }
+    local json_response = cjson.encode(response)
+    return json_response
 end
 
 function MainController.default(body)
-    return "default, main controller"
+    local response = {
+        message = "Default, main controller"
+    }
+    local json_response = cjson.encode(response)
+    return json_response
 end
 
 return MainController

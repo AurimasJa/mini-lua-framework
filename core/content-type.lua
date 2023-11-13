@@ -1,10 +1,8 @@
 
-local contents = {
-    ["application/json"] = true,
-    ["application/x-www-form-urlencoded"] = true,
-    ["multipart/form-data"] = function(contentType)
-        return string.match(contentType, "^multipart/form%-data")
-    end
+local available_contents = {
+    "application/json",
+    "application/x%-www%-form%-urlencoded",
+    "multipart/form%-data"
 }
 
-return contents
+return available_contents

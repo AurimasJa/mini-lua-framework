@@ -1,4 +1,5 @@
 local Responses = require("modules.http_responses")
+local Parser = require("middleware.parser")
 local Router = {}
 local routes = {}
 local contr = require("controllers.main_controller")
@@ -31,14 +32,16 @@ function Router.delete(url, handler)
 end
 
 function Router.default(params)
-    return contr.default("test")
+    return contr.default("test") -- TODO: check if default function exists
 end
 
-function Router.route(url, method, uhttpd, req)
+function Router.route(url, urlParams, method, uhttpd, req)
+    local parsed_url = Parser.parse_url_parameters(urlParams)
+
     local route = routes[url]
 
     if not route then
-        return Router.default(url)
+        return Responses.send_not_found(uhttpd) -- check response
     end
     local handler = route.handler
 
@@ -51,20 +54,21 @@ function Router.route(url, method, uhttpd, req)
     end
 
     local controller_name, function_name = string.match(handler, "([^.]+)%.?([^.]*)")
-    if not function_name or function_name == "" then
-        function_name = "default"
-    end
     if not controller_name then
         return Responses.send_internal_server_error(uhttpd) -- check response
+    end
+    if not function_name or function_name == "" then
+        function_name = "default"
+        Router.default(req)
     end
 
     local success, controller = pcall(require, "controllers." .. controller_name)
     if not success then
-        return Responses.send_internal_server_error(uhttpd) -- check response
+        return Responses.send_not_found(uhttpd) -- check response
     end
 
     if not controller or not controller[function_name] or type(controller[function_name]) ~= "function" then
-        return Responses.send_internal_server_error(uhttpd) -- check response
+        return Responses.send_not_found(uhttpd) -- check response
     end
 
     return controller[function_name](req)
