@@ -27,15 +27,15 @@ GET /api/resource/anon<br />
 ## Response you will get will be in application/json
 /api/resource/get
 `json
-{<br />
-    "message": "Index, main controller"<br />
-}<br />
-{<br />
-    "REQUEST_METHOD": "GET"<br />
-}<br />
-{<br />
-    "url": "/resource/get"<br />
-}<br />
-{<br />
-    "name": "nil"<br />
-}`<br />
+{
+    "message": "Index, main controller"
+}
+{
+    "REQUEST_METHOD": "GET"
+}
+{
+    "url": "/resource/get"
+}
+{
+    "name": "nil"
+}`
