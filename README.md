@@ -10,9 +10,9 @@
     "multipart/form-data"<br />
 <br />
 All available paths to test:<br />
-GET /api/resource/get <br />
-GET /api/resource/get/{id}<br />
-GET /api/resource/get/{?name&?age}<br />
+GET /api/resource/get/{?name}/{?age}<br />
+GET /api/resource/param/{?age}/{?name}/{?city}/{?country}/{?delivery}/{?post_code}<br />
+GET /api/resource/name/{id}/{?city}<br />
 POST /api/resource/post<br />
 PUT /api/resource/put<br />
 PATCH /api/resource/patch<br />
