@@ -25,7 +25,7 @@ end
 
 function Request:get_queries()
     local response = {
-        url = self.query
+        query = self.query
     }
     local json_response = cjson.encode(response)
     return json_response

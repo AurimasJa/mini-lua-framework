@@ -1,5 +1,6 @@
 local Router = require("modules.router")
 
+Router.get("/resource", "main_controller.index")
 Router.get("/resource/get/{?name}/{?age}", "main_controller.index")
 Router.get("/resource/param/{?age}/{?name}/{?city}/{?country}/{?delivery}/{?post_code}", "main_controller.index")
 Router.get("/resource/name/{id}/{?city}", "main_controller.index")

@@ -1,7 +1,6 @@
 Helper = {}
 
 function Helper.read_request_body(headers)
-    local content
     local contentLength = tonumber(headers.CONTENT_LENGTH) or 0
 
     local requestBody = ""
