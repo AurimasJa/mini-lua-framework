@@ -20,27 +20,26 @@ function handle_route(env)
     local parsedUrl = Parser.parse_url_route(env)
     local urlParams, headers = Parser.parseRequest(env)
     local content_type = Validator.validate_content_type(uhttpd, headers)
-    uhttpd.send("Status: 200\r\n")
-    uhttpd.send("Content-Type: application/json\r\n\r\n") -- HARDCODED ATM ! 
     if content_type ~= false then
         local body = Helper.read_request_body(headers)
         local req = Request:create()
         req = Parser.parse_body(content_type, body, urlParams, headers)
-        local route = Routes.route(parsedUrl, urlParams, method, uhttpd, req)
+        local route = Routes.route(parsedUrl, method, uhttpd, req)
 
-
+        uhttpd.send("Status: 200\r\n")
+        uhttpd.send("Content-Type: application/json\r\n\r\n") -- HARDCODED ATM !
         if route ~= nil then
             print(route)
         end
         if type(req) == "table" then
             if req:get_headers() ~= nil then
-                print(req:get_headers_value("REQUEST_METHOD"))
+                print(req:get_header("REQUEST_METHOD"))
             end
-            if req:get_query() ~= nil then
-                print(req:get_query())
+            if req:get_queries() ~= nil then
+                print(req:get_queries())
             end
-            if req:get_payload() ~= nil then
-                print(req:get_payload_value("name"))
+            if req:get_inputs() ~= nil then
+                print(req:get_input("name"))
             end
         else
             print(req)

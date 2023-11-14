@@ -1,9 +1,9 @@
 local cjson = require("cjson")
 local Responses = {}
 
-function Responses.send_bad_request(uhttpd)
+function Responses.send_bad_request(uhttpd, message)
     local response = {
-        response = "Bad request"
+        response = message
     }
     local json_response = cjson.encode(response)
     uhttpd.send("Status: 400 Bad request\r\n")
@@ -12,9 +12,9 @@ function Responses.send_bad_request(uhttpd)
     os.exit()
 end
 
-function Responses.send_unauthorized(uhttpd)
+function Responses.send_unauthorized(uhttpd, message)
     local response = {
-        response = "Unauthorized"
+        response = message
     }
     local json_response = cjson.encode(response)
     uhttpd.send("Status: 401 Unauthorized\r\n")
@@ -23,9 +23,9 @@ function Responses.send_unauthorized(uhttpd)
     os.exit()
 end
 
-function Responses.send_forbidden(uhttpd)
+function Responses.send_forbidden(uhttpd, message)
     local response = {
-        response = "Forbidden"
+        response = message
     }
     local json_response = cjson.encode(response)
     uhttpd.send("Status: 403 Forbidden\r\n")
@@ -45,9 +45,9 @@ function Responses.send_not_found(uhttpd, message)
     os.exit()
 end
 
-function Responses.send_method_not_allowed(uhttpd)
+function Responses.send_method_not_allowed(uhttpd, message)
     local response = {
-        response = "Method not allowed"
+        response = message
     }
 
     local json_response = cjson.encode(response)
@@ -58,10 +58,9 @@ function Responses.send_method_not_allowed(uhttpd)
     os.exit()
 end
 
-
-function Responses.send_unsupported_media_type(uhttpd)
+function Responses.send_unsupported_media_type(uhttpd, message)
     local response = {
-        response = "Unsupported Media Type"
+        response = message
     }
     local json_response = cjson.encode(response)
     uhttpd.send("Status: 415 Unsupported Media Type\r\n")
@@ -70,9 +69,9 @@ function Responses.send_unsupported_media_type(uhttpd)
     os.exit()
 end
 
-function Responses.send_internal_server_error(uhttpd)
+function Responses.send_internal_server_error(uhttpd, message)
     local response = {
-        response = "Internal server error"
+        response = message
     }
     local json_response = cjson.encode(response)
     uhttpd.send("Status: 500 Internal server error\r\n")

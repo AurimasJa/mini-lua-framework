@@ -69,8 +69,6 @@ function Parser.parse_url_route(env)
     return string.match(route, "/api(/[^?]+)")
 end
 
--- function Parser.is_parameter_must_be
-
 function Parser.parse_url_parameters(url)
     local params = {}
     local sequences = {}
@@ -110,9 +108,14 @@ function Parser.parse_body(content_type, body, urlParams, headers)
         end
     end
     if not data.error then
+        local url_params = Parser.parse_url_parameters(urlParams)
+        local json = {
+            urlParams = urlParams,
+            url_params = url_params
+        }
         req:set_headers(headers)
-        req:set_query(urlParams)
-        req:set_payload(data)
+        req:set_query(json)
+        req:set_inputs(data)
         return req
     end
     return data_error

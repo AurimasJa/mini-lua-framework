@@ -31,36 +31,83 @@ function Router.delete(url, handler)
     Router.add_route(url, handler, "DELETE")
 end
 
-function Router.default(params)
-    return contr.default("test") -- TODO: check if default function exists
+function Router.default(req, url, method, parsed_params, controller_name, function_name, uhttpd)
+    local success, controller = pcall(require, "controllers." .. controller_name)
+
+    if not success then
+        return Responses.send_not_found(uhttpd, "Controller [" .. controller_name .. "] does not exist!")
+    end
+
+    if not controller or not controller[function_name] or type(controller[function_name]) ~= "function" then
+        return Responses.send_not_found(uhttpd, "Controller [" .. function_name .. "] method does not exist!")
+    end
+
+    return controller[function_name](req, url, method, parsed_params)
 end
 
-function Router.route(url, urlParams, method, uhttpd, req)
-    uhttpd.send("Status: 200\r\n")
-    uhttpd.send("Content-Type: application/json\r\n\r\n") -- HARDCODED ATM !
-    local parsed_url = Parser.parse_url_parameters(urlParams)
-    print(url)
-    local route = routes[url]
+local function match_route(route, url)
+    local pattern = "^" .. route:gsub("{%??([^/]+)}", "([^/]-)"):gsub("/", "/?") .. "$" -- ([^/]+)
+    local records = { string.match(url, pattern) }
 
-    if not route then
-        local foundPattern
-        for pattern, handler in pairs(routes) do
-            print(url:match(pattern))
-            local matchedParams = { url:match(pattern) }
-            if #matchedParams > 0 and handler.method == method then
-                if not foundPattern or #matchedParams > #foundPattern then
-                    foundPattern = matchedParams
-                end
+    if #records > 0 then
+        local params = {}
+
+        local param_pattern = "{(%??)([^/]+)}" -- {?id} ~= {id}
+        local param_names = {}
+
+        for optional, value in route:gmatch(param_pattern) do
+            local is_optional = optional == "?" -- true = ?
+            table.insert(param_names, { value = value, optional = is_optional })
+        end
+
+        local counter = 1
+        local records_cleaned = {}
+
+        for _, value in ipairs(records) do
+            if value ~= "" then
+                table.insert(records_cleaned, value)
             end
         end
 
-        print(foundPattern)
-        -- return Responses.send_not_found(uhttpd, "Route is not implemented") -- check response
+        for _, param in ipairs(param_names) do
+            if not param.optional and (records_cleaned[counter] == nil or records_cleaned[counter] == "") then
+                return false
+            end
+
+            params[param.value] = records_cleaned[counter] or (param.optional and "") -- or nil
+            counter = counter + 1
+        end
+
+        return true, params, route
     end
+
+    return false
+end
+function Router.route(url, method, uhttpd, req)
+    local parsed_params
+    local success
+
+    for route, struct in pairs(routes) do
+        local temp
+        success, parsed_params, temp = match_route(route, url)
+        if success and struct.method == method then
+            url = temp
+            break
+        end
+    end
+
+    local route = routes[url]
+
+    if not route then
+        return Responses.send_not_found(uhttpd, "Route " .. url .. " is not implemented") -- check response
+    end
+
     local handler = route.handler
 
     if route.method ~= method or not handler then
-        return Responses.send_method_not_allowed(uhttpd) -- check response
+        return Responses.send_method_not_allowed(uhttpd,
+            "There was a problem with your request - " ..
+            method .. "; expected " .. route.method .. " or handler was not implemented") -- check response
     end
 
     if type(handler) == "function" then
@@ -68,24 +115,27 @@ function Router.route(url, urlParams, method, uhttpd, req)
     end
 
     local controller_name, function_name = string.match(handler, "([^.]+)%.?([^.]*)")
+
     if not controller_name then
-        return Responses.send_internal_server_error(uhttpd) -- check response
+        return Responses.send_internal_server_error(uhttpd, "Controller does not exist!") -- check response
     end
+
     if not function_name or function_name == "" then
         function_name = "default"
-        Router.default(req)
+        Router.default(req, url, method, parsed_params, controller_name, function_name, uhttpd)
     end
 
     local success, controller = pcall(require, "controllers." .. controller_name)
+
     if not success then
-        return Responses.send_not_found(uhttpd, "Controller does not exist!") -- check response
+        return Responses.send_not_found(uhttpd, "Controller [" .. controller_name .. "] does not exist!") -- check response
     end
 
     if not controller or not controller[function_name] or type(controller[function_name]) ~= "function" then
-        return Responses.send_not_found(uhttpd, "Controller method does not exist!") -- check response
+        return Responses.send_not_found(uhttpd, "Controller [" .. function_name .. "] method does not exist!") -- check response
     end
 
-    return controller[function_name](req)
+    return controller[function_name](req, url, method, parsed_params)
 end
 
 return Router
