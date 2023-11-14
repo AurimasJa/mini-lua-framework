@@ -43,7 +43,7 @@ function Router.default(req, url, method, parsed_params, controller_name, functi
     return controller[function_name](req, url, method, parsed_params)
 end
 
-local function match_route(route, url)
+local function match_route(route, url, uhttpd)
     local pattern = "^" .. route:gsub("{%??([^/]+)}", "([^/]-)"):gsub("/", "/?") .. "$" -- ([^/]+)
     local records = { string.match(url, pattern) }
 
@@ -69,7 +69,7 @@ local function match_route(route, url)
 
         for _, param in ipairs(param_names) do
             if not param.optional and (records_cleaned[counter] == nil or records_cleaned[counter] == "") then
-                return false
+                return Responses.send_bad_request(uhttpd, "Parameters must be provided. " .. route)
             end
 
             params[param.value] = records_cleaned[counter] or (param.optional and "") -- or nil
@@ -87,7 +87,7 @@ function Router.route(url, method, uhttpd, req)
 
     for route, struct in pairs(routes) do
         local temp
-        success, parsed_params, temp = match_route(route, url)
+        success, parsed_params, temp = match_route(route, url, uhttpd)
         if success and struct.method == method then
             url = temp
             break
