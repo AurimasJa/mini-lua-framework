@@ -1,11 +1,14 @@
 local cjson = require("cjson")
 local Request = require("modules.request")
+local Responses = require("modules.http_responses")
 local Parser = {}
 
-local function parse_json(data)
-    local parsedData = {}
-    parsedData = cjson.decode(data)
-    return parsedData
+local function parse_json(data, uhttpd)
+    local success, response = pcall(cjson.decode, data)
+    if not success then
+        return Responses.send_bad_request(uhttpd, response .. ". Check your inputs.")
+    end
+    return response
 end
 local function parse_encoded(data, body)
     local parsedData = {}
@@ -90,31 +93,37 @@ function Parser.parse_url_parameters(url)
     return params
 end
 
-function Parser.parse_body(content_type, body, urlParams, headers)
+function Parser.parse_body(content_type, body, urlParams, headers, uhttpd)
     local data = {}
     local data_error
+    local success
     local req = Request:create()
+    if body ~= "" then
+        if content_type == "application/json" then
+            data = parse_json(body, uhttpd)
+        elseif content_type == "application/x-www-form-urlencoded" then
+            success, data = pcall(parse_encoded, urlParams, body)
+            if not success then
+                return Responses.send_bad_request(uhttpd, data .. ". Check your inputs.")
+            end
+        elseif string.match(content_type, "^multipart/form%-data") then
+            local boundary = content_type:match("boundary=([^;]+)")
+            if boundary then
+                success, data = pcall(parse_multipart, body, boundary)
 
-    if content_type == "application/json" then
-        data = parse_json(body)
-    elseif content_type == "application/x-www-form-urlencoded" then
-        data = parse_encoded(urlParams, body)
-    elseif string.match(content_type, "^multipart/form%-data") then
-        local boundary = content_type:match("boundary=([^;]+)")
-        if boundary then
-            data = parse_multipart(body, boundary)
-        else
-            data_error = "Invalid multipart/form-data format"
+                if not success then
+                    return Responses.send_bad_request(uhttpd, data .. ". Check your inputs.")
+                end
+            else
+                return Responses.send_bad_request(uhttpd, "Invalid multipart/form-data format.")
+            end
         end
     end
+ 
     if not data.error then
         local url_params = Parser.parse_url_parameters(urlParams)
-        local json = {
-            urlParams = urlParams,
-            url_params = url_params
-        }
         req:set_headers(headers)
-        req:set_query(json)
+        req:set_query(url_params)
         req:set_inputs(data)
         return req
     end

@@ -1,8 +1,6 @@
 local Responses = require("modules.http_responses")
-local Parser = require("middleware.parser")
 local Router = {}
 local routes = {}
-local contr = require("controllers.main_controller")
 
 function Router.add_route(url, handler, method)
     routes[url] = {
@@ -99,7 +97,7 @@ function Router.route(url, method, uhttpd, req)
     local route = routes[url]
 
     if not route then
-        return Responses.send_not_found(uhttpd, "Route " .. url .. " is not implemented") -- check response
+        return Responses.send_not_found(uhttpd, "Route " .. url .. " is not implemented")
     end
 
     local handler = route.handler
@@ -107,7 +105,7 @@ function Router.route(url, method, uhttpd, req)
     if route.method ~= method or not handler then
         return Responses.send_method_not_allowed(uhttpd,
             "There was a problem with your request - " ..
-            method .. "; expected " .. route.method .. " or handler was not implemented") -- check response
+            method .. "; expected " .. route.method .. " or handler was not implemented")
     end
 
     if type(handler) == "function" then
@@ -117,7 +115,7 @@ function Router.route(url, method, uhttpd, req)
     local controller_name, function_name = string.match(handler, "([^.]+)%.?([^.]*)")
 
     if not controller_name then
-        return Responses.send_internal_server_error(uhttpd, "Controller does not exist!") -- check response
+        return Responses.send_not_found(uhttpd, "Controller does not exist!")
     end
 
     if not function_name or function_name == "" then
@@ -128,11 +126,11 @@ function Router.route(url, method, uhttpd, req)
     local success, controller = pcall(require, "controllers." .. controller_name)
 
     if not success then
-        return Responses.send_not_found(uhttpd, "Controller [" .. controller_name .. "] does not exist!") -- check response
+        return Responses.send_not_found(uhttpd, "Controller [" .. controller_name .. "] does not exist!")
     end
 
     if not controller or not controller[function_name] or type(controller[function_name]) ~= "function" then
-        return Responses.send_not_found(uhttpd, "Controller [" .. function_name .. "] method does not exist!") -- check response
+        return Responses.send_not_found(uhttpd, "Controller [" .. function_name .. "] method does not exist!")
     end
 
     return controller[function_name](req, url, method, parsed_params)

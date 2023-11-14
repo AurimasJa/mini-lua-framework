@@ -42,7 +42,7 @@ function MainController.destroy(req, method, url, parsed_params)
     return json_response
 end
 
-function MainController.default(req, method, url, parsed_params)
+function MainController.defaults(req, method, url, parsed_params)
     local response = {
         message = "Default, main controller   " .. url .. "    " .. method,
         parsed_params = parsed_params,
