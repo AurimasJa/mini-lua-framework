@@ -119,15 +119,12 @@ function Parser.parse_body(content_type, body, urlParams, headers, uhttpd)
             end
         end
     end
- 
-    if not data.error then
-        local url_params = Parser.parse_url_parameters(urlParams)
-        req:set_headers(headers)
-        req:set_query(url_params)
-        req:set_inputs(data)
-        return req
-    end
-    return data_error
+
+    local url_params = Parser.parse_url_parameters(urlParams)
+    req:set_headers(headers)
+    req:set_query(url_params)
+    req:set_inputs(data)
+    return req
 end
 
 return Parser
