@@ -1,4 +1,6 @@
 local Responses = require("modules.http_responses")
+local Response = require("modules.response")
+
 local Router = {}
 local routes = {}
 
@@ -39,12 +41,15 @@ function Router.default(req, url, method, parsed_params, controller_name, functi
     if not controller or not controller[function_name] or type(controller[function_name]) ~= "function" then
         return Responses.send_not_found(uhttpd, "Controller [" .. function_name .. "] method does not exist!")
     end
-
-    return controller[function_name](req, url, method, parsed_params)
+    local response = Response.new()
+    return controller[function_name](req, response, parsed_params)
 end
 
 local function match_route(route, url, uhttpd)
     local pattern = "^" .. route:gsub("{%??([^/]+)}", "([^/]-)"):gsub("/", "/?") .. "$" -- ([^/]+)
+    if url == "" or url == nil then
+        return Responses.send_bad_request(uhttpd, "Url is not provided correctly. Resource does not exist.")
+    end
     local records = { string.match(url, pattern) }
 
     if #records > 0 then
@@ -122,7 +127,6 @@ function Router.route(url, method, uhttpd, req)
         function_name = "default"
         Router.default(req, url, method, parsed_params, controller_name, function_name, uhttpd)
     end
-
     local success, controller = pcall(require, "controllers." .. controller_name)
 
     if not success then
@@ -133,7 +137,13 @@ function Router.route(url, method, uhttpd, req)
         return Responses.send_not_found(uhttpd, "Controller [" .. function_name .. "] method does not exist!")
     end
 
-    return controller[function_name](req, url, method, parsed_params)
+    local response = Response.new()
+    -- for key, value in pairs(response) do
+    --     print(key, value)
+    -- end
+
+    -- print(response:send())
+    return controller[function_name](req, response, parsed_params)
 end
 
 return Router
