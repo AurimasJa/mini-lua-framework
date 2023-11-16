@@ -26,8 +26,6 @@ function handle_route(env)
         req = Parser.parse_body(content_type, body, urlParams, headers, uhttpd)
         local route = Routes.route(parsedUrl, method, uhttpd, req)
 
-        uhttpd.send("Status: 200\r\n")
-        uhttpd.send("Content-Type: application/json\r\n\r\n") -- HARDCODED ATM !
         if route ~= nil then
             print(route)
         end

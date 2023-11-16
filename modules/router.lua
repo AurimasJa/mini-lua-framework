@@ -87,6 +87,7 @@ local function match_route(route, url, uhttpd)
     return false
 end
 function Router.route(url, method, uhttpd, req)
+    local response = Response.new()
     local parsed_params
     local success
 
@@ -114,7 +115,7 @@ function Router.route(url, method, uhttpd, req)
     end
 
     if type(handler) == "function" then
-        return handler(req)
+        return handler(req, response)
     end
 
     local controller_name, function_name = string.match(handler, "([^.]+)%.?([^.]*)")
@@ -137,12 +138,7 @@ function Router.route(url, method, uhttpd, req)
         return Responses.send_not_found(uhttpd, "Controller [" .. function_name .. "] method does not exist!")
     end
 
-    local response = Response.new()
-    -- for key, value in pairs(response) do
-    --     print(key, value)
-    -- end
 
-    -- print(response:send())
     return controller[function_name](req, response, parsed_params)
 end
 

@@ -4,7 +4,7 @@ Response.__index = Response
 
 function Response.new()
     local self = {
-        status_code = "200 OK",
+        status_code = 200,
         headers = { ["Content-Type"] = "text/plain" },
         output = "Successful",
     }
