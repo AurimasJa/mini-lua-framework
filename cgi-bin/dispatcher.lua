@@ -19,12 +19,12 @@ function handle_route(env)
     local method = Parser.parse_request_method(env)
     local parsedUrl = Parser.parse_url_route(env)
     local urlParams, headers = Parser.parseRequest(env)
-    local content_type = Validator.validate_content_type(uhttpd, headers)
+    local content_type = Validator.validate_content_type(headers)
     if content_type ~= false then
         local body = Helper.read_request_body(headers)
         local req = Request:create()
-        req = Parser.parse_body(content_type, body, urlParams, headers, uhttpd)
-        local route = Routes.route(parsedUrl, method, uhttpd, req)
+        req = Parser.parse_body(content_type, body, urlParams, headers)
+        local route = Routes.route(parsedUrl, method, req)
 
         if route ~= nil then
             print(route)

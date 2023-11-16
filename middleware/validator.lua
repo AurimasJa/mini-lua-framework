@@ -4,7 +4,7 @@ local Validator = {}
 
 
 
-function Validator.validate_content_type(uhttpd, headers)
+function Validator.validate_content_type(headers)
     if not headers.CONTENT_TYPE then
         Responses.send_bad_request("Request CONTENT-TYPE is not provided!")
         return false

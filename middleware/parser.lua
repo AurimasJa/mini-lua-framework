@@ -3,7 +3,7 @@ local Request = require("modules.request")
 local Responses = require("responses.http_responses")
 local Parser = {}
 
-local function parse_json(data, uhttpd)
+local function parse_json(data)
     local success, response = pcall(cjson.decode, data)
     if not success then
         return Responses.send_bad_request(response .. ". Check your inputs.")
@@ -93,14 +93,14 @@ function Parser.parse_url_parameters(url)
     return params
 end
 
-function Parser.parse_body(content_type, body, urlParams, headers, uhttpd)
+function Parser.parse_body(content_type, body, urlParams, headers)
     local data = {}
     local data_error
     local success
     local req = Request:create()
     if body ~= "" then
         if content_type == "application/json" then
-            data = parse_json(body, uhttpd)
+            data = parse_json(body)
         elseif content_type == "application/x-www-form-urlencoded" then
             success, data = pcall(parse_encoded, urlParams, body)
             if not success then
