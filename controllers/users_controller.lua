@@ -48,9 +48,6 @@ end
 
 -----------------
 function UsersController.update(req, resp, parsed_params)
-    for index, value in pairs(req.input) do
-        print(index, value)
-    end
     local user = User.get:where({ id = parsed_params["id"] }):first()
     if req.input.username ~= "" or req.input.username ~= nil then user.username = req.input.username end
     if req.input.password ~= "" or req.input.password ~= nil then user.password = req.input.password end
@@ -79,11 +76,10 @@ function UsersController.destroy(req, resp, parsed_params)
         request = req
     }
     if user and user.username then
-        print("Username:", user.username)
         user:delete()
         return resp:with_status(200):with_headers({ ["Content-Type"] = "application/json" }):with_output(response):send()
     end
-    
+
     return resp:with_status(400):with_headers({ ["Content-Type"] = "application/json" }):with_output("BAD REQUEST"):send()
 end
 
