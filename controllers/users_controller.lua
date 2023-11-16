@@ -1,5 +1,7 @@
 local cjson = require("cjson")
+local Valid = require("middleware.controller_validator.validator")
 local models = require("models.users_model")
+local codes = require("responses.http_codes")
 local User = models.User
 
 local UsersController = {}
@@ -26,6 +28,11 @@ function UsersController.index(req, resp, parsed_params)
 end
 
 function UsersController.create(req, resp, parsed_params)
+    local validator = Valid.new(req.input)
+    local is_data_valid, error_message = validator:validate_all_data()
+    if not is_data_valid then
+        return resp:with_status(codes.BadRequest):with_headers({ ["Content-Type"] = "application/json" }):with_output(error_message):send()
+    end
     local user = User({
         username = req.input.username,
         password = req.input.password,
@@ -48,6 +55,11 @@ end
 
 -----------------
 function UsersController.update(req, resp, parsed_params)
+    local validator = Valid.new(req.input)
+    local is_data_valid, error_message = validator:validate_all_data()
+    if not is_data_valid then
+        return resp:with_status(codes.BadRequest):with_headers({ ["Content-Type"] = "application/json" }):with_output(error_message):send()
+    end
     local user = User.get:where({ id = parsed_params["id"] }):first()
     if req.input.username ~= "" or req.input.username ~= nil then user.username = req.input.username end
     if req.input.password ~= "" or req.input.password ~= nil then user.password = req.input.password end
