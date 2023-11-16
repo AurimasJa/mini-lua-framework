@@ -11,7 +11,7 @@ Router.delete("/resource/delete/{id}", "users_controller.destroy")
 
 Router.get("/resource/main/get/{id}/{?city}", "main_controller.index")
 Router.post("/resource/main/main/post", "main_controller.create")
-Router.put("/resource/put/{id}", "main_controller.update")
+Router.put("/resource/main/put/{id}", "main_controller.update")
 Router.patch("/resource/main/patch/{id}", "main_controller.update")
 Router.delete("/resource/main/delete/{id}", "main_controller.destroy")
 Router.get("/resource/main/test", "main_controller")
