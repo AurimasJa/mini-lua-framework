@@ -5,7 +5,7 @@ local Validator = require("middleware.validator")
 local Request = require("modules.request")
 local Helper = require("helpers.read_request_body")
 local Routes = require("routes.routes")
-local Responses = require("modules.http_responses")
+local Responses = require("responses.http_responses")
 
 local function send_response(response)
     uhttpd.send("Status: 200\r\n")

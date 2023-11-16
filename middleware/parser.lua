@@ -1,12 +1,12 @@
 local cjson = require("cjson")
 local Request = require("modules.request")
-local Responses = require("modules.http_responses")
+local Responses = require("responses.http_responses")
 local Parser = {}
 
 local function parse_json(data, uhttpd)
     local success, response = pcall(cjson.decode, data)
     if not success then
-        return Responses.send_bad_request(uhttpd, response .. ". Check your inputs.")
+        return Responses.send_bad_request(response .. ". Check your inputs.")
     end
     return response
 end
@@ -104,7 +104,7 @@ function Parser.parse_body(content_type, body, urlParams, headers, uhttpd)
         elseif content_type == "application/x-www-form-urlencoded" then
             success, data = pcall(parse_encoded, urlParams, body)
             if not success then
-                return Responses.send_bad_request(uhttpd, data .. ". Check your inputs.")
+                return Responses.send_bad_request(data .. ". Check your inputs.")
             end
         elseif string.match(content_type, "^multipart/form%-data") then
             local boundary = content_type:match("boundary=([^;]+)")
@@ -112,10 +112,10 @@ function Parser.parse_body(content_type, body, urlParams, headers, uhttpd)
                 success, data = pcall(parse_multipart, body, boundary)
 
                 if not success then
-                    return Responses.send_bad_request(uhttpd, data .. ". Check your inputs.")
+                    return Responses.send_bad_request(data .. ". Check your inputs.")
                 end
             else
-                return Responses.send_bad_request(uhttpd, "Invalid multipart/form-data format.")
+                return Responses.send_bad_request("Invalid multipart/form-data format.")
             end
         end
     end

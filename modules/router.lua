@@ -1,5 +1,5 @@
-local Responses = require("modules.http_responses")
-local Response = require("modules.response")
+local Responses = require("responses.http_responses")
+local Response = require("responses.response")
 
 local Router = {}
 local routes = {}
@@ -31,24 +31,24 @@ function Router.delete(url, handler)
     Router.add_route(url, handler, "DELETE")
 end
 
-function Router.default(req, url, method, parsed_params, controller_name, function_name, uhttpd)
+function Router.default(req, url, method, parsed_params, controller_name, function_name)
     local success, controller = pcall(require, "controllers." .. controller_name)
 
     if not success then
-        return Responses.send_not_found(uhttpd, "Controller [" .. controller_name .. "] does not exist!")
+        return Responses.send_not_found("Controller [" .. controller_name .. "] does not exist!")
     end
 
     if not controller or not controller[function_name] or type(controller[function_name]) ~= "function" then
-        return Responses.send_not_found(uhttpd, "Controller [" .. function_name .. "] method does not exist!")
+        return Responses.send_not_found("Controller [" .. function_name .. "] method does not exist!")
     end
     local response = Response.new()
     return controller[function_name](req, response, parsed_params)
 end
 
-local function match_route(route, url, uhttpd)
+local function match_route(route, url)
     local pattern = "^" .. route:gsub("{%??([^/]+)}", "([^/]-)"):gsub("/", "/?") .. "$" -- ([^/]+)
     if url == "" or url == nil then
-        return Responses.send_bad_request(uhttpd, "Url is not provided correctly. Resource does not exist.")
+        return Responses.send_bad_request("Url is not provided correctly. Resource does not exist.")
     end
     local records = { string.match(url, pattern) }
 
@@ -74,7 +74,7 @@ local function match_route(route, url, uhttpd)
 
         for _, param in ipairs(param_names) do
             if not param.optional and (records_cleaned[counter] == nil or records_cleaned[counter] == "") then
-                return Responses.send_bad_request(uhttpd, "Parameters must be provided. " .. route)
+                return Responses.send_bad_request("Parameters must be provided. " .. route)
             end
 
             params[param.value] = records_cleaned[counter] or (param.optional and "") -- or nil
@@ -86,14 +86,14 @@ local function match_route(route, url, uhttpd)
 
     return false
 end
-function Router.route(url, method, uhttpd, req)
+function Router.route(url, method, req)
     local response = Response.new()
     local parsed_params
     local success
 
     for route, struct in pairs(routes) do
         local temp
-        success, parsed_params, temp = match_route(route, url, uhttpd)
+        success, parsed_params, temp = match_route(route, url)
         if success and struct.method == method then
             url = temp
             break
@@ -103,14 +103,13 @@ function Router.route(url, method, uhttpd, req)
     local route = routes[url]
 
     if not route then
-        return Responses.send_not_found(uhttpd, "Route " .. url .. " is not implemented")
+        return Responses.send_not_found("Route " .. url .. " is not implemented")
     end
 
     local handler = route.handler
 
     if route.method ~= method or not handler then
-        return Responses.send_method_not_allowed(uhttpd,
-            "There was a problem with your request - " ..
+        return Responses.send_method_not_allowed("There was a problem with your request - " ..
             method .. "; expected " .. route.method .. " or handler was not implemented")
     end
 
@@ -121,21 +120,21 @@ function Router.route(url, method, uhttpd, req)
     local controller_name, function_name = string.match(handler, "([^.]+)%.?([^.]*)")
 
     if not controller_name then
-        return Responses.send_not_found(uhttpd, "Controller does not exist!")
+        return Responses.send_not_found("Controller does not exist!")
     end
 
     if not function_name or function_name == "" then
         function_name = "default"
-        Router.default(req, url, method, parsed_params, controller_name, function_name, uhttpd)
+        Router.default(req, url, method, parsed_params, controller_name, function_name)
     end
     local success, controller = pcall(require, "controllers." .. controller_name)
 
     if not success then
-        return Responses.send_not_found(uhttpd, "Controller [" .. controller_name .. "] does not exist!")
+        return Responses.send_not_found("Controller [" .. controller_name .. "] does not exist!")
     end
 
     if not controller or not controller[function_name] or type(controller[function_name]) ~= "function" then
-        return Responses.send_not_found(uhttpd, "Controller [" .. function_name .. "] method does not exist!")
+        return Responses.send_not_found("Controller [" .. function_name .. "] method does not exist!")
     end
 
 
