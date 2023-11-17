@@ -134,7 +134,6 @@ function Router.route(url, method, req)
     end
 
     local success, controller = pcall(require, "controllers." .. controller_name)
-    print(controller)
     if not success then
         return Responses.send_not_found("Controller [" .. controller_name .. "] does not exist!")
     end

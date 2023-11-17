@@ -128,10 +128,20 @@ function Query(own_table, data)
             insert = insert .. ") \n\t    VALUES (" .. values .. ")"
 
             -- TODO: return valid ID
-            _connect = db:insert(insert)
-
+            -- _connect = db:insert(insert)
+            local success, error_message = pcall(function()
+                _connect = db:insert(insert)
+            end)
+        
+            if not success then
+                BACKTRACE(ERROR, "Error during insert: " .. error_message)
+                return false
+            end
             self._data.id = {new = _connect}
-            
+            print(_connect)
+            if _connect == nil or _connect == "" then
+                return false
+            end
             return true -- true for checking
         end,
 
@@ -164,6 +174,7 @@ function Query(own_table, data)
                 update = update .. " SET " .. set .. "\n\t    WHERE `" .. ID .. "` = " .. self.id
                 db:execute(update)
             end
+            return true -- true for checking
         end,
 
         ------------------------------------------------
@@ -173,11 +184,11 @@ function Query(own_table, data)
         -- save row
         save = function (self)
             if self.id then
-                self:_update()
-                return true -- true for checking
+                if self:_update() then return true else return false end -- UPD!!!
+                -- return true -- true for checking
             else
-                self:_add()
-                return true -- true for checking
+                if self:_add() then return true end -- INSERT!!!
+                -- return true -- true for checking
             end
         end,
 
@@ -190,8 +201,10 @@ function Query(own_table, data)
                 delete = delete .. "WHERE `" .. ID .. "` = " .. self.id
 
                 db:execute(delete)
+                result = true
             end
             self._data = {}
+            return result
         end
     }
 

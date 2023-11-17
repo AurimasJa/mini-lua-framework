@@ -26,12 +26,12 @@ function UsersController.index(req, resp, parsed_params)
 end
 
 function UsersController.create(req, resp, parsed_params)
-    local validator = Valid.new(req:get_inputs())
-    local is_data_valid, error_message = validator:validate_all_data()
-    if not is_data_valid then
-        return resp:with_status(codes.BadRequest):with_headers({ ["Content-Type"] = "application/json" }):with_output(
-            error_message):send()
-    end
+    -- local validator = Valid.new(req:get_inputs())
+    -- local is_data_valid, error_message = validator:validate_all_data()
+    -- if not is_data_valid then
+    --     return resp:with_status(codes.BadRequest):with_headers({ ["Content-Type"] = "application/json" }):with_output(
+    --         error_message):send()
+    -- end
 
     -- local role1 = rmodels.Role.get:where({ id = 1 }):first()
     -- local role2 = rmodels.Role.get:where({ id = 2 }):first()
@@ -46,24 +46,31 @@ function UsersController.create(req, resp, parsed_params)
         age = req:get_input("age"),
         time_create = os.time()
     })
-    local success = user:save()
-    if success then
-        print("YEAHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHh")
-    end
+    print(user:save())
+    -- local success, error_message = pcall(function()
+    --     user:save()
+    -- end)
+    
+    -- if not success then
+    --     return resp:with_status(400)
+    --     :with_headers({ ["Content-Type"] = "application/json" })
+    --     :with_output(error_message)
+    --     :send()
+    -- end
     -- print(role1:_data())
     -- print(user:_data())
     -- -- print(user:update())
     -- print(user.update)
     -- print(user._data.id)
-    for key, value in pairs(user._data.id) do
-        print(key, value)
-        if type(value) == "table" then
-            for k, v in pairs(value) do
-                print(k, v)
-            end
-        end
-        -- print(key,value)
-    end
+    -- for key, value in pairs(user._data.id) do
+    --     print(key, value)
+    --     if type(value) == "table" then
+    --         for k, v in pairs(value) do
+    --             print(k, v)
+    --         end
+    --     end
+    --     -- print(key,value)
+    -- end
     -- local userrole1 = models.UserRole({
     --     user_id = 1,
     --     role_id = 1,
@@ -82,7 +89,6 @@ function UsersController.create(req, resp, parsed_params)
     return resp:with_status(201):with_headers({ ["Content-Type"] = "application/json" }):with_output(response):send()
 end
 
------------------
 function UsersController.update(req, resp, parsed_params)
     local validator = Valid.new(req.input)
     local is_data_valid, error_message = validator:validate_all_data()
@@ -96,8 +102,11 @@ function UsersController.update(req, resp, parsed_params)
     if req.input.city ~= "" or req.input.city ~= nil then user.city = req.input.city end
     if req.input.country ~= "" or req.input.country ~= nil then user.country = req.input.country end
     if req.input.age ~= "" or req.input.age ~= nil then user.age = req.input.age end
-    user:save()
-
+    local success = user:save()
+    if success then
+        return resp:with_status(400):with_headers({ ["Content-Type"] = "application/json" }):with_output(
+            "There was an error updating your value"):send()
+    end
     local response = {
         message = "Update was successful",
     }
@@ -108,26 +117,19 @@ end
 function UsersController.destroy(req, resp, parsed_params)
     local user = models.User.get:where({ id = parsed_params["id"] }):first()
 
-
     local response = {
         message = "Delete was successful",
     }
     if user and user.username then
-        user:delete()
+        local success = user:delete()
+        if success then
+            return resp:with_status(400):with_headers({ ["Content-Type"] = "application/json" }):with_output(
+                "There was an error deleting your request"):send()
+        end
         return resp:with_status(200):with_headers({ ["Content-Type"] = "application/json" }):with_output(response):send()
     end
 
     return resp:with_status(400):with_headers({ ["Content-Type"] = "application/json" }):with_output("BAD REQUEST"):send()
-end
-
-function UsersController.default(req, resp, parsed_params)
-    local response = {
-        message = "That is default method",
-        parsed_params = parsed_params,
-        request = req
-    }
-    local json_response = cjson.encode(response)
-    return resp:with_status(200):with_headers({ ["Content-Type"] = "application/json" }):with_output(response):send()
 end
 
 return UsersController
