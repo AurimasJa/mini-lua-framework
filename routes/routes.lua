@@ -1,7 +1,7 @@
 local Router = require("modules.router")
 
 
-
+Router.get("/", "users_controller.")
 Router.get("/resource/get/{id}/{?city}", "users_controller.index")
 Router.post("/resource/post", "users_controller.create")
 Router.put("/resource/put/{id}", "users_controller.update")

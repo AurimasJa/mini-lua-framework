@@ -131,6 +131,8 @@ function Query(own_table, data)
             _connect = db:insert(insert)
 
             self._data.id = {new = _connect}
+            
+            return true -- true for checking
         end,
 
         -- Update data in database
@@ -172,8 +174,10 @@ function Query(own_table, data)
         save = function (self)
             if self.id then
                 self:_update()
+                return true -- true for checking
             else
                 self:_add()
+                return true -- true for checking
             end
         end,
 

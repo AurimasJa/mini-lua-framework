@@ -2,7 +2,7 @@ local cjson = require("cjson")
 local Request = {}
 Request.__index = Request
 
-function Request:create()
+function Request.create()
     local ins = {}
     setmetatable(ins, Request)
     ins.headers = {}
@@ -56,11 +56,12 @@ function Request:get_inputs()
 end
 
 function Request:get_input(key)
-    local response = {
-        [key] = self.input[key] or "nil"
-    }
-    local json_response = cjson.encode(response)
-    return json_response
+    -- local response = {
+    --     [key] = self.input[key] or "nil"
+    -- }
+    -- local json_response = cjson.encode(response)
+    -- return json_response
+    return self.input[key] or "nil"
 end
 
 return Request

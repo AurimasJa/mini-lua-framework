@@ -14,7 +14,7 @@ function Validator.validate_content_type(headers)
 
     local is_valid = false
     for _, allowed_type in ipairs(Available_Contents) do
-        if string.match(content_type, allowed_type) then
+        if string.match(content_type, allowed_type) and #content_type == #allowed_type then
             is_valid = true
             break
         end

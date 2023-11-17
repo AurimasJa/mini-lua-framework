@@ -33,6 +33,7 @@ function Validation:validate_all_data()
 end
 
 function Validation:validate_username(username)
+    if username == "" or username == nil then return false, "Username is required" end
     if #username < 2 or #username > 100 then
         return false,
             "Username must be longer than 2 symbols and can not be longer than 100"
@@ -46,6 +47,7 @@ function Validation:validate_username(username)
 end
 
 function Validation:validate_password(password)
+    if password == "" or password == nil then return false, "Password is required" end
     if #password < 2 or #password > 50 then
         return false,
             "Password must be longer than 2 symbols and can not be longer than 50"
@@ -55,6 +57,7 @@ function Validation:validate_password(password)
 end
 
 function Validation:validate_age(age)
+    if age == "" or age == nil then return false, "Age is required" end
     if type(age) ~= "number" then return false, "Provided age is incorrect!" end
     if age < 1 or age > 99 then
         return false,

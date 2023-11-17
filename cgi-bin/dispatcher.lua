@@ -22,7 +22,7 @@ function handle_route(env)
     local content_type = Validator.validate_content_type(headers)
     if content_type ~= false then
         local body = Helper.read_request_body(headers)
-        local req = Request:create()
+        local req = Request.create()
         req = Parser.parse_body(content_type, body, urlParams, headers)
         local route = Routes.route(parsedUrl, method, req)
 

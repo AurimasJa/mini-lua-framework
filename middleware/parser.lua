@@ -66,6 +66,9 @@ end
 
 function Parser.parse_url_route(env)
     local route = env.REQUEST_URI
+    if #route == 5  and string.match(route, "/$", #route) then
+        return "/"
+    end
     if string.find(route, "/$") then
         route = route:sub(1, -2)
     end

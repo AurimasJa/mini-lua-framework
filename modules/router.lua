@@ -3,6 +3,13 @@ local Response = require("responses.response")
 
 local Router = {}
 local routes = {}
+local default_functions = {
+    GET = "index",
+    POST = "create",
+    PUT = "put",
+    PATCH = "patch",
+    DELETE = "destroy"
+}
 
 function Router.add_route(url, handler, method)
     routes[url] = {
@@ -90,7 +97,6 @@ function Router.route(url, method, req)
     local response = Response.new()
     local parsed_params
     local success
-
     for route, struct in pairs(routes) do
         local temp
         success, parsed_params, temp = match_route(route, url)
@@ -124,11 +130,11 @@ function Router.route(url, method, req)
     end
 
     if not function_name or function_name == "" then
-        function_name = "default"
-        Router.default(req, url, method, parsed_params, controller_name, function_name)
+        function_name = default_functions[route.method]
     end
-    local success, controller = pcall(require, "controllers." .. controller_name)
 
+    local success, controller = pcall(require, "controllers." .. controller_name)
+    print(controller)
     if not success then
         return Responses.send_not_found("Controller [" .. controller_name .. "] does not exist!")
     end
