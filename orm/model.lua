@@ -99,18 +99,24 @@ db = {
         BACKTRACE(DEBUG, query)
 
         local result = self.connect:execute(query)
-
         if result then
-            return result
+            --sqlite3
+            if string.match(query:upper(), "^%s*INSERT%s+") then
+                local lastInsertId = self.connect:execute("SELECT last_insert_rowid() as last_id"):fetch()
+                return lastInsertId
+            else
+                return result
+            end
         else
             BACKTRACE(WARNING, "Wrong SQL query")
+            return false
         end
     end,
 
     -- Return insert query id
     insert = function (self, query)
         local _cursor = self:execute(query)
-        return 1
+        return _cursor
     end,
 
     -- get parced data

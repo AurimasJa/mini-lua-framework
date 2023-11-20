@@ -26,7 +26,13 @@ function UsersController.index(req, resp, parsed_params)
 end
 
 function UsersController.create(req, resp, parsed_params)
-    -- local validator = Valid.new(req:get_inputs())
+    local validator = Valid.new(req:get_inputs())
+    local suc, err = validator:validate_all_data(req:get_input("username"), "required|only_letters")
+    if not suc then
+        resp:with_status(400):with_headers({ ["Content-Type"] = "application/json" }):with_output(err):send()
+    end
+
+
     -- local is_data_valid, error_message = validator:validate_all_data()
     -- if not is_data_valid then
     --     return resp:with_status(codes.BadRequest):with_headers({ ["Content-Type"] = "application/json" }):with_output(
@@ -38,6 +44,7 @@ function UsersController.create(req, resp, parsed_params)
     -- for key, value in pairs(role1) do
     --     print(key, value)
     -- end
+
     local user = models.User({
         username = req:get_input("username"),
         password = req:get_input("password"),
@@ -46,11 +53,16 @@ function UsersController.create(req, resp, parsed_params)
         age = req:get_input("age"),
         time_create = os.time()
     })
-    print(user:save())
+    local success, id = user:save()
+    if not success or id == nil or id == "" then
+        resp:with_status(400):with_headers({ ["Content-Type"] = "application/json" }):with_output(
+        "There was an error inserting into database"):send()
+    end
+    print(id)
     -- local success, error_message = pcall(function()
     --     user:save()
     -- end)
-    
+
     -- if not success then
     --     return resp:with_status(400)
     --     :with_headers({ ["Content-Type"] = "application/json" })

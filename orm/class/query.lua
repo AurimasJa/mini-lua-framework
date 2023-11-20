@@ -41,10 +41,9 @@ function Query(own_table, data)
         --
         -- @return {string|boolean|number|nil} column value
         -----------------------------------------
-        _get_col = function (self, colname)
+        _get_col = function(self, colname)
             if self._data[colname] and self._data[colname].new then
                 return self._data[colname].new
-
             elseif self._readonly[colname] then
                 return self._readonly[colname]
             end
@@ -55,7 +54,7 @@ function Query(own_table, data)
         -- @colname {string} column name in table
         -- @colvalue {string|number|boolean} new column value
         -----------------------------------------
-        _set_col = function (self, colname, colvalue)
+        _set_col = function(self, colname, colvalue)
             local coltype
 
             if self._data[colname] and self._data[colname].new and colname ~= ID then
@@ -75,7 +74,7 @@ function Query(own_table, data)
         ------------------------------------------------
 
         -- Add new row to table
-        _add = function (self)
+        _add = function(self)
             local insert = "INSERT INTO `" .. self.own_table.__tablename__ .. "` ("
             local counter = 0
             local values = ""
@@ -87,7 +86,6 @@ function Query(own_table, data)
                 colname = table_column.name
 
                 if colname ~= ID then
-
                     -- If value exist correct value
                     if self[colname] ~= nil then
                         value = self[colname]
@@ -97,15 +95,14 @@ function Query(own_table, data)
                             value = table_column.field.as(value)
                         else
                             BACKTRACE(WARNING, "Wrong type for table '" ..
-                                                self.own_table.__tablename__ ..
-                                                "' in column '" .. tostring(colname) .. "'")
+                                self.own_table.__tablename__ ..
+                                "' in column '" .. tostring(colname) .. "'")
                             return false
                         end
 
-                    -- Set default value
+                        -- Set default value
                     elseif table_column.settings.default then
                         value = table_column.field.as(table_column.settings.default)
-
                     else
                         value = "NULL"
                     end
@@ -132,21 +129,22 @@ function Query(own_table, data)
             local success, error_message = pcall(function()
                 _connect = db:insert(insert)
             end)
-        
+
             if not success then
                 BACKTRACE(ERROR, "Error during insert: " .. error_message)
                 return false
             end
-            self._data.id = {new = _connect}
-            print(_connect)
-            if _connect == nil or _connect == "" then
-                return false
+            self._data.id = { new = _connect }
+            if _connect == nil or _connect == "" or self._data.id == "" then
+                return false, _connect
+            else
+                return true, _connect
             end
             return true -- true for checking
         end,
 
         -- Update data in database
-        _update = function (self)
+        _update = function(self)
             local update = "UPDATE `" .. self.own_table.__tablename__ .. "` "
             local equation_for_set = {}
             local set, coltype
@@ -156,14 +154,13 @@ function Query(own_table, data)
                     coltype = self.own_table:get_column(colname)
 
                     if coltype and coltype.field.validator(colinfo.new) then
-
                         local colvalue = _G.escapeValue(self.own_table, colname, colinfo.new)
                         set = " `" .. colname .. "` = " .. coltype.field.as(colvalue)
 
                         table.insert(equation_for_set, set)
                     else
                         BACKTRACE(WARNING, "Can't update value for column `" ..
-                                           Type.to.str(colname) .. "`")
+                            Type.to.str(colname) .. "`")
                     end
                 end
             end
@@ -182,18 +179,19 @@ function Query(own_table, data)
         ------------------------------------------------
 
         -- save row
-        save = function (self)
+        save = function(self)
             if self.id then
                 if self:_update() then return true else return false end -- UPD!!!
                 -- return true -- true for checking
             else
-                if self:_add() then return true end -- INSERT!!!
+                local success, id = self:_add()
+                if success then return success, id else return false end -- INSERT!!!
                 -- return true -- true for checking
             end
         end,
 
         -- delete row
-        delete = function (self)
+        delete = function(self)
             local delete, result
 
             if self.id then
@@ -214,7 +212,7 @@ function Query(own_table, data)
         for colname, colvalue in pairs(data) do
             if query.own_table:has_column(colname) then
                 colvalue = query.own_table:get_column(colname)
-                                          .field.to_type(colvalue)
+                    .field.to_type(colvalue)
                 query._data[colname] = {
                     new = colvalue,
                     old = colvalue
@@ -226,7 +224,6 @@ function Query(own_table, data)
 
                     query._readonly[colname .. "_all"] = QueryList(current_table, {})
                     query._readonly[colname .. "_all"]:add(colvalue)
-
                 end
 
                 query._readonly[colname] = colvalue
@@ -234,11 +231,13 @@ function Query(own_table, data)
         end
     else
         BACKTRACE(INFO, "Create empty row instance for table '" ..
-                        self.own_table.__tablename__ .. "'")
+            self.own_table.__tablename__ .. "'")
     end
 
-    setmetatable(query, {__index = query._get_col,
-                         __newindex = query._set_col})
+    setmetatable(query, {
+        __index = query._get_col,
+        __newindex = query._set_col
+    })
 
     return query
 end

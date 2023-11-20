@@ -9,65 +9,25 @@ function Validation.new(data)
     return instance
 end
 
-function Validation:validate_all_data()
-    local username = self.data.username
-    local password = self.data.password
-    local age = self.data.age
-    local is_username_valid, username_error = Validation:validate_username(username)
-    local is_password_valid, password_error = Validation:validate_password(password)
-    local is_age_valid, age_error = Validation:validate_age(age)
-    local isDataValid = is_username_valid and is_password_valid and is_age_valid
-
-    local error_message = ""
-    if not is_username_valid then
-        error_message = error_message .. username_error .. " "
-    end
-    if not is_password_valid then
-        error_message = error_message .. password_error .. " "
-    end
-    if not is_age_valid then
-        error_message = error_message .. age_error .. " "
+function Validation:validate_all_data(field, validators)
+    local splitted_validators = {}
+    for val in validators:gmatch("[^|]+") do
+        table.insert(splitted_validators, val)
     end
 
-    return isDataValid, error_message
-end
-
-function Validation:validate_username(username)
-    if username == "" or username == nil then return false, "Username is required" end
-    if #username < 2 or #username > 100 then
-        return false,
-            "Username must be longer than 2 symbols and can not be longer than 100"
+    for _, value in pairs(splitted_validators) do
+        if value == "length" then
+            if #field > value and type(field) == "string" then return false, "Field is too long" end
+        elseif value == "required" then
+            if field == "" or field == nil then return false, "Field is required" end
+        elseif value == "only_letters" then
+            if field:lower():match("%a") then return false, "Field must contain only letters" end
+        elseif value == "only_digits" then
+            if field:match("%d") then return false, "Field must contain only digits" end
+        elseif value == "email" then
+            if not field:match("^[%w.+]+@%w+%.%w+$") then return false, "Email address is not correct" end
+        end
     end
-
-    if string.match(username, "%d") ~= nil then
-        return false, "Username can not contain numbers"
-    end
-
-    return true
-end
-
-function Validation:validate_password(password)
-    if password == "" or password == nil then return false, "Password is required" end
-    if #password < 2 or #password > 50 then
-        return false,
-            "Password must be longer than 2 symbols and can not be longer than 50"
-    end
-
-    return true
-end
-
-function Validation:validate_age(age)
-    if age == "" or age == nil then return false, "Age is required" end
-    if type(age) ~= "number" then return false, "Provided age is incorrect!" end
-    if age < 1 or age > 99 then
-        return false,
-            "Provided age is incorrect!"
-    end
-
-    if string.match(age, "%a") ~= nil then
-        return false, "Provided age is incorrect!"
-    end
-
     return true
 end
 
