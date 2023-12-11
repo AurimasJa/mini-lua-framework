@@ -84,6 +84,10 @@ request_instance:get_input("data")
 
 ### Response
 Response you will get will be in application/json
+Defined codes can be found in:
+```
+./responses/http_codes.lua
+```
 Ability to give custom responses
 ```
 function UsersController.index(req, resp, parsed_params)
@@ -93,6 +97,24 @@ function UsersController.index(req, resp, parsed_params)
     }
 
     return resp:with_status(200):with_headers({ ["Content-Type"] = "application/json" }):with_output(response):send()
+end
+```
+There are built in http-responses by codes that can be used in the methods. They can be customized in:
+```
+./responses/http_responses.lua
+```
+
+```
+function Responses.custom_error(message)
+    resp:with_status([code to provide]):with_headers({ ["Content-Type"] = "application/json" }):with_output(message):send()
+    os.exit()
+end
+```
+FOR EXAMPLE:
+```
+function Responses.custom_error(message)
+    resp:with_status(codes.InternalServerError):with_headers({ ["Content-Type"] = "application/json" }):with_output(message):send()
+    os.exit()
 end
 ```
 
